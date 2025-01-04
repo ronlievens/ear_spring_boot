@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<server description="dco">
+
+    <!-- https://openliberty.io/docs/latest/reference/feature/feature-overview.html -->
+    <featureManager>
+        <!-- connection pools -->
+        <feature>jndi-1.0</feature>
+        <feature>jdbc-4.3</feature>
+
+        <!-- application dependencies -->
+        <feature>transportSecurity-1.0</feature>
+        <feature>servlet-6.0</feature>
+        <feature>websocket-2.1</feature>
+        <feature>expressionLanguage-5.0</feature>
+
+        <!-- show more info -->
+        <feature>monitor-1.0</feature>
+        <feature>localConnector-1.0</feature>
+    </featureManager>
+
+    <!-- load needed jars -->
+    <library id="dco_libs">
+        <fileset dir="${server.config.dir}libs" includes="*.jar"/>
+    </library>
+
+    <!-- setup database - https://openliberty.io/docs/latest/relational-database-connections-JDBC.html#unknown -->
+    <dataSource jndiName="jdbc/dco" type="javax.sql.XADataSource">
+        <jdbcDriver libraryRef="dco_libs"
+                    javax.sql.XADataSource="org.mariadb.jdbc.MariaDbDataSource"/>
+        <properties url="jdbc:mariadb://192.168.99.11:3306/dco"
+                    user="dco"
+                    password="[geheim]"/>
+    </dataSource>
+
+    <!-- To access this server from a remote client add a host attribute to the following element, e.g. host="*" -->
+    <httpEndpoint id="defaultHttpEndpoint"
+                  httpPort="9080"
+                  httpsPort="9443"/>
+
+    <!-- Default SSL configuration enables trust for default certificates from the Java runtime -->
+    <ssl id="defaultSSLConfig" trustDefaultCerts="true"/>
+    <keyStore id="defaultKeyStore" location="${wlp.install.dir}/servers/computerhuis.p12" type="PKCS12"
+              password="[geheim]"/>
+
+    <!-- EARS -->
+    <enterpriseApplication location="%USERPROFILE%\Projecten\computerhuis\dco-desktop\target\dco.ear">
+        <classloader commonLibraryRef="dco_libs" delegation="parentFirst"/>
+    </enterpriseApplication>
+</server>
